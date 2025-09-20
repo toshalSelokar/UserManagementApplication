@@ -1,0 +1,199 @@
+package com.example.SpringBootDemo.security;
+
+import com.example.SpringBootDemo.entity.User;
+import com.example.SpringBootDemo.entity.UserRole;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.io.Serializable;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
+/**
+ * Custom UserDetails implementation for Spring Security
+ * 
+ * This class adapts our User entity to Spring Security's UserDetails interface
+ * and implements Serializable for session storage
+ * 
+ * @author User Management Team
+ * @version 1.0
+ */
+public class CustomUserDetails implements UserDetails, Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    // Store only essential user data for serialization
+    private final Long userId;
+    private final String email;
+    private final String password;
+    private final String firstName;
+    private final String lastName;
+    private final UserRole role;
+    private final boolean enabled;
+    private final boolean accountNonExpired;
+    private final boolean accountNonLocked;
+    private final boolean credentialsNonExpired;
+
+    public CustomUserDetails(User user) {
+        // Ensure user has required fields set
+        if (user.getRole() == null) {
+            user.setRole(UserRole.USER);
+        }
+        
+        // Store essential data for serialization
+        this.userId = user.getId();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.firstName = user.getFirstName();
+        this.lastName = user.getLastName();
+        this.role = user.getRole();
+        this.enabled = user.isEnabled();
+        this.accountNonExpired = user.isAccountNonExpired();
+        this.accountNonLocked = user.isAccountNonLocked();
+        this.credentialsNonExpired = user.isCredentialsNonExpired();
+    }
+
+    /**
+     * Get user authorities based on role and permissions
+     */
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return role.getAuthorities().stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return email; // Using email as username
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return accountNonExpired;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return accountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return credentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Get user ID
+     */
+    public Long getUserId() {
+        return userId;
+    }
+
+    /**
+     * Get user's email
+     */
+    public String getEmail() {
+        return email;
+    }
+
+    /**
+     * Get user's full name for display purposes
+     */
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
+
+    /**
+     * Get user's first name
+     */
+    public String getFirstName() {
+        return firstName;
+    }
+
+    /**
+     * Get user's last name
+     */
+    public String getLastName() {
+        return lastName;
+    }
+
+    /**
+     * Get user's role
+     */
+    public String getRole() {
+        return role.name();
+    }
+
+    /**
+     * Get user's role display name
+     */
+    public String getRoleDisplayName() {
+        return role.getDisplayName();
+    }
+
+    /**
+     * Get user role enum
+     */
+    public UserRole getUserRole() {
+        return role;
+    }
+
+    /**
+     * Check if user has specific role
+     */
+    public boolean hasRole(String roleName) {
+        return getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_" + roleName));
+    }
+
+    /**
+     * Check if user has specific authority
+     */
+    public boolean hasAuthority(String authority) {
+        return getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals(authority));
+    }
+
+    /**
+     * Create a User object from this UserDetails (for compatibility)
+     */
+    public User toUser() {
+        User user = new User();
+        user.setId(userId);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setRole(role);
+        user.setEnabled(enabled);
+        user.setAccountNonExpired(accountNonExpired);
+        user.setAccountNonLocked(accountNonLocked);
+        user.setCredentialsNonExpired(credentialsNonExpired);
+        return user;
+    }
+
+    @Override
+    public String toString() {
+        return "CustomUserDetails{" +
+                "userId=" + userId +
+                ", email='" + email + '\'' +
+                ", role=" + role +
+                ", enabled=" + enabled +
+                ", accountNonExpired=" + accountNonExpired +
+                ", accountNonLocked=" + accountNonLocked +
+                ", credentialsNonExpired=" + credentialsNonExpired +
+                '}';
+    }
+}
