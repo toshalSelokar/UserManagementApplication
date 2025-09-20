@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Login - User Management System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 100%;
+            max-width: 450px;
+            animation: slideIn 0.6s ease-out;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .login-header h2 {
+            color: #333;
+            font-size: 2.2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .login-header p {
+            color: #666;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .security-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .form-group { 
+            margin-bottom: 25px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 8px; 
+            font-weight: 600;
+            color: #333;
+            font-size: 1em;
+        }
+        input[type="text"], input[type="password"] { 
+            width: 100%; 
+            padding: 15px; 
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: white;
+        }
+        .login-button { 
+            width: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white; 
+            padding: 15px 20px; 
+            border: none; 
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        .login-button:active {
+            transform: translateY(0);
+        }
+        .alert { 
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        .alert-error { 
+            color: #721c24; 
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .alert-success { 
+            color: #155724; 
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .links a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        .demo-users {
+            background: linear-gradient(45deg, #e9ecef, #f8f9fa);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 1px solid #dee2e6;
+        }
+        .demo-users h4 {
+            margin-top: 0;
+            color: #495057;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        .demo-users ul {
+            margin: 15px 0;
+            padding-left: 0;
+            list-style: none;
+        }
+        .demo-users li {
+            background: white;
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .demo-users .role {
+            font-weight: bold;
+            color: #667eea;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .input-icon {
+            position: relative;
+        }
+        .input-icon::before {
+            content: "👤";
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            z-index: 1;
+        }
+        .input-icon.password::before {
+            content: "🔒";
+        }
+        .input-icon input {
+            padding-left: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h2>🔐 Welcome Back</h2>
+            <p>Sign in to your account</p>
+            <div class="security-badge">🛡️ Secured Login</div>
+        </div>
+        
+        <!-- Display error message -->
+        <div th:if="${error}" class="alert alert-error">
+            <strong>❌ Login Failed:</strong> <span th:text="${error}"></span>
+        </div>
+        
+        <!-- Display success message -->
+        <div th:if="${message}" class="alert alert-success">
+            <strong>✅ Success:</strong> <span th:text="${message}"></span>
+        </div>
+        
+        <!-- Login form -->
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label for="email">Email Address:</label>
+                <div class="input-icon">
+                    <input type="text" id="email" name="email" required 
+                           placeholder="Enter your email address" 
+                           autocomplete="username">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <div class="input-icon password">
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Enter your password"
+                           autocomplete="current-password">
+                </div>
+            </div>
+            
+            <button type="submit" class="login-button">🚀 Sign In</button>
+        </form>
+        
+        <div class="links">
+            <a href="/">← Back to Home</a>
+            <a href="/register">Create Account</a>
+        </div>
+        
+        <!-- Demo users information -->
+        <div class="demo-users">
+            <h4>🎯 Demo Users (for testing)</h4>
+            <ul>
+                <li><span class="role">👑 Admin:</span> admin@example.com / admin123</li>
+                <li><span class="role">👔 Manager:</span> manager@example.com / manager123</li>
+                <li><span class="role">👤 User:</span> user@example.com / user123</li>
+            </ul>
+            <p style="text-align: center; margin: 15px 0 0 0; font-size: 0.9em; color: #6c757d;">
+                <em>💡 These users are created automatically for demonstration purposes.</em>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

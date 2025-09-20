@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Home - User Management System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 50px 0;
+        }
+        .header h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease-out;
+        }
+        .header p {
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 50px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+        .btn-secondary {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        .btn-secondary:hover {
+            background-color: white;
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+            box-shadow: 0 4px 15px rgba(40,167,69,0.3);
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+            transform: translateY(-2px);
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+            animation: fadeInUp 1s ease-out;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-card h3 {
+            margin-top: 0;
+            color: #ffd700;
+            font-size: 1.5em;
+        }
+        .feature-card ul {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-card li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        .feature-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .user-info {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .user-info h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .api-links {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        .api-links h3 {
+            color: #ffd700;
+            margin-top: 0;
+        }
+        .api-links ul {
+            list-style: none;
+            padding: 0;
+        }
+        .api-links li {
+            margin: 12px 0;
+        }
+        .api-links a {
+            color: #87ceeb;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        .api-links a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .security-badge {
+            display: inline-block;
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px;
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 User Management System</h1>
+            <p>A comprehensive Spring Boot application with Spring Security</p>
+            <div class="security-badge">🛡️ Secured with Spring Security</div>
+            <div class="security-badge">🔑 Role-Based Access Control</div>
+            <div class="security-badge">🚀 RESTful API</div>
+        </div>
+        
+        <!-- Show user info if authenticated -->
+        <div sec:authorize="isAuthenticated()" class="user-info">
+            <h3>👋 Welcome back, <span sec:authentication="name">User</span>!</h3>
+            <p>You are currently logged in with roles: <span sec:authentication="authorities">ROLE_USER</span></p>
+            <div class="nav-buttons">
+                <a href="/dashboard" class="btn btn-success">🏠 Go to Dashboard</a>
+                <a href="/profile" class="btn btn-primary">👤 View Profile</a>
+                <a href="/api/users" class="btn btn-secondary">📋 Users API</a>
+                <form th:action="@{/logout}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">🚪 Logout</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Show login/register buttons if not authenticated -->
+        <div sec:authorize="!isAuthenticated()" class="nav-buttons">
+            <a href="/login" class="btn btn-primary">🔐 Login</a>
+            <a href="/register" class="btn btn-secondary">📝 Register</a>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>🔐 Spring Security Features</h3>
+                <p>Complete authentication and authorization implementation:</p>
+                <ul>
+                    <li>Form-based login with custom pages</li>
+                    <li>Role-based access control (RBAC)</li>
+                    <li>Method-level security annotations</li>
+                    <li>BCrypt password encryption</li>
+                    <li>Session management</li>
+                    <li>CSRF protection</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3>👥 User Management</h3>
+                <p>Full CRUD operations with security integration:</p>
+                <ul>
+                    <li>Create, Read, Update, Delete users</li>
+                    <li>Search and filter functionality</li>
+                    <li>User registration with validation</li>
+                    <li>Profile management</li>
+                    <li>Role-based user access</li>
+                    <li>Account locking and enabling</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🚀 Secure RESTful API</h3>
+                <p>Comprehensive REST API with security:</p>
+                <ul>
+                    <li>JWT-ready authentication</li>
+                    <li>Role-based endpoint protection</li>
+                    <li>Method-level authorization</li>
+                    <li>Input validation and sanitization</li>
+                    <li>Proper HTTP status codes</li>
+                    <li>Error handling and logging</li>
+                </ul>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🏥 Monitoring & Health</h3>
+                <p>Built-in monitoring and security features:</p>
+                <ul>
+                    <li>Spring Boot Actuator endpoints</li>
+                    <li>Health checks and metrics</li>
+                    <li>Security event logging</li>
+                    <li>Failed login attempt tracking</li>
+                    <li>H2 Database console (dev)</li>
+                    <li>Application performance monitoring</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="api-links">
+            <h3>🔗 Quick Access Links</h3>
+            <ul>
+                <li><a href="/api/users" target="_blank">📋 Users API</a> - View all users (requires authentication)</li>
+                <li><a href="/api/secure/me" target="_blank">👤 Current User API</a> - Get current user info</li>
+                <li><a href="/actuator/health" target="_blank">🏥 Health Check</a> - Application health status</li>
+                <li><a href="/h2-console" target="_blank">🗄️ H2 Database Console</a> - Database management (dev)</li>
+                <li><a href="/actuator" target="_blank">📊 Actuator Endpoints</a> - Monitoring endpoints</li>
+            </ul>
+        </div>
+        
+        <div class="api-links">
+            <h3>🎯 Test Users (for demonstration)</h3>
+            <ul>
+                <li><strong>👑 Admin:</strong> admin@example.com / admin123 - Full system access</li>
+                <li><strong>👔 Manager:</strong> manager@example.com / manager123 - User management access</li>
+                <li><strong>👤 User:</strong> user@example.com / user123 - Basic user access</li>
+            </ul>
+            <p><em>These users are created automatically when the application starts.</em></p>
+        </div>
+        
+        <div class="api-links">
+            <h3>📚 Security Implementation</h3>
+            <p>This application demonstrates comprehensive Spring Security concepts:</p>
+            <ul>
+                <li>Authentication vs Authorization</li>
+                <li>UserDetails and UserDetailsService</li>
+                <li>Password encoding with BCrypt</li>
+                <li>Role-based and method-level security</li>
+                <li>Custom security configuration</li>
+                <li>Security event handling and auditing</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

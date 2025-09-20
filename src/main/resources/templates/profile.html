@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Profile - User Management System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f8f9fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #6f42c1, #5a2d91);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .logout-btn {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .profile-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #6f42c1, #5a2d91);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: white;
+            margin: 0 auto 20px;
+        }
+        .profile-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #6f42c1;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #6f42c1;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            font-size: 1.1em;
+        }
+        .authorities-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .authority-badge {
+            background: #6f42c1;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin: 5px;
+            display: inline-block;
+        }
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .nav-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>⚙️ User Profile</h1>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="logout-btn">🚪 Logout</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <div class="profile-avatar">👤</div>
+                <h2 th:text="${user.fullName}">User Name</h2>
+                <p th:text="${user.role.displayName}">User Role</p>
+            </div>
+            
+            <div class="profile-info">
+                <div class="info-item">
+                    <div class="info-label">First Name</div>
+                    <div class="info-value" th:text="${user.firstName}">John</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Last Name</div>
+                    <div class="info-value" th:text="${user.lastName}">Doe</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value" th:text="${user.email}">john.doe@example.com</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value" th:text="${user.phone} ?: 'Not provided'">+1234567890</div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Account Status</div>
+                    <div class="info-value">
+                        <span th:if="${user.enabled}" style="color: #28a745;">✅ Active</span>
+                        <span th:unless="${user.enabled}" style="color: #dc3545;">❌ Disabled</span>
+                    </div>
+                </div>
+                
+                <div class="info-item">
+                    <div class="info-label">Member Since</div>
+                    <div class="info-value" th:text="${#temporals.format(user.createdAt, 'MMM dd, yyyy')}">Jan 01, 2024</div>
+                </div>
+            </div>
+            
+            <div class="authorities-section">
+                <h4 style="margin-top: 0; color: #6f42c1;">🔐 Permissions & Authorities</h4>
+                <div th:each="authority : ${userDetails.authorities}" class="authority-badge" th:text="${authority.authority}">ROLE_USER</div>
+            </div>
+            
+            <div class="authorities-section">
+                <h4 style="margin-top: 0; color: #6f42c1;">📊 Account Details</h4>
+                <div class="profile-info">
+                    <div class="info-item">
+                        <div class="info-label">Account Non Expired</div>
+                        <div class="info-value">
+                            <span th:if="${user.accountNonExpired}" style="color: #28a745;">✅ Yes</span>
+                            <span th:unless="${user.accountNonExpired}" style="color: #dc3545;">❌ No</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">Account Non Locked</div>
+                        <div class="info-value">
+                            <span th:if="${user.accountNonLocked}" style="color: #28a745;">✅ Yes</span>
+                            <span th:unless="${user.accountNonLocked}" style="color: #dc3545;">❌ No</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">Credentials Non Expired</div>
+                        <div class="info-value">
+                            <span th:if="${user.credentialsNonExpired}" style="color: #28a745;">✅ Yes</span>
+                            <span th:unless="${user.credentialsNonExpired}" style="color: #dc3545;">❌ No</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">Failed Login Attempts</div>
+                        <div class="info-value" th:text="${user.failedLoginAttempts}">0</div>
+                    </div>
+                    
+                    <div class="info-item" th:if="${user.lastLogin}">
+                        <div class="info-label">Last Login</div>
+                        <div class="info-value" th:text="${#temporals.format(user.lastLogin, 'MMM dd, yyyy HH:mm')}">Never</div>
+                    </div>
+                    
+                    <div class="info-item">
+                        <div class="info-label">Last Updated</div>
+                        <div class="info-value" th:text="${#temporals.format(user.updatedAt, 'MMM dd, yyyy HH:mm')}">Jan 01, 2024</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="/dashboard" class="btn btn-primary">🏠 Back to Dashboard</a>
+                <a href="/" class="btn btn-secondary">🏠 Home</a>
+                <button onclick="testAPI('/api/secure/me', 'GET')" class="btn btn-primary">🔄 Refresh Profile</button>
+            </div>
+            
+            <div id="api-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; display: none;">
+                <h5>API Response:</h5>
+                <pre id="api-response"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testAPI(url, method) {
+            const resultDiv = document.getElementById('api-result');
+            const responseDiv = document.getElementById('api-response');
+            
+            resultDiv.style.display = 'block';
+            responseDiv.textContent = 'Loading...';
+            
+            fetch(url, { method: method })
+            .then(response => response.json())
+            .then(data => {
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                resultDiv.style.backgroundColor = '#d4edda';
+            })
+            .catch(error => {
+                responseDiv.textContent = 'Error: ' + error.message;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            });
+        }
+    </script>
+</body>
+</html>
