@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Admin Dashboard - User Management System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f8f9fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .logout-btn {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav-tabs {
+            background: white;
+            padding: 0;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .nav-tabs a {
+            display: inline-block;
+            padding: 15px 25px;
+            text-decoration: none;
+            color: #666;
+            border-right: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        .nav-tabs a:hover, .nav-tabs a.active {
+            background-color: #dc3545;
+            color: white;
+        }
+        .nav-tabs a:last-child {
+            border-right: none;
+        }
+        .user-info {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .user-info h3 {
+            margin-top: 0;
+            color: #dc3545;
+        }
+        .admin-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .admin-panel h4 {
+            color: #dc3545;
+            margin-top: 0;
+        }
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .function-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+        }
+        .function-card h5 {
+            margin-top: 0;
+            color: #dc3545;
+        }
+        .function-card ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .function-card li {
+            margin: 8px 0;
+        }
+        .test-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #1e7e34;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .authorities-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .authority-badge {
+            background: #dc3545;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .stat-card p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>👑 Admin Dashboard</h1>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="logout-btn">🚪 Logout</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="nav-tabs">
+            <a href="/dashboard" class="active">🏠 Dashboard</a>
+            <a href="/admin/dashboard">👑 Admin Panel</a>
+            <a href="/manager/dashboard" sec:authorize="hasAnyRole('MANAGER', 'ADMIN')">👔 Manager Panel</a>
+            <a href="/user/dashboard">👤 User Panel</a>
+            <a href="/profile">⚙️ Profile</a>
+        </div>
+        
+        <div class="user-info">
+            <h3>Welcome, <span th:text="${fullName}">Admin User</span>! 👑</h3>
+            <p><strong>Email:</strong> <span th:text="${username}">admin@example.com</span></p>
+            <p><strong>Role:</strong> <span th:text="${role}">ADMIN</span></p>
+            <p><strong>Message:</strong> <span th:text="${welcomeMessage}">Welcome message</span></p>
+            
+            <div class="authorities-list">
+                <div th:each="authority : ${authorities}" class="authority-badge" th:text="${authority.authority}">ROLE_ADMIN</div>
+            </div>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>∞</h3>
+                <p>Full Access</p>
+            </div>
+            <div class="stat-card">
+                <h3>🛡️</h3>
+                <p>Security Level</p>
+            </div>
+            <div class="stat-card">
+                <h3>👥</h3>
+                <p>User Management</p>
+            </div>
+            <div class="stat-card">
+                <h3>📊</h3>
+                <p>System Reports</p>
+            </div>
+        </div>
+        
+        <div class="admin-panel">
+            <h4>🛠️ Admin Functions</h4>
+            
+            <div class="function-grid">
+                <div class="function-card">
+                    <h5>👥 User Management</h5>
+                    <ul>
+                        <li>View all users</li>
+                        <li>Create new users</li>
+                        <li>Update user information</li>
+                        <li>Delete users</li>
+                        <li>Manage user roles</li>
+                    </ul>
+                </div>
+                
+                <div class="function-card">
+                    <h5>📊 System Statistics</h5>
+                    <ul>
+                        <li>User statistics</li>
+                        <li>Role distribution</li>
+                        <li>Login activity</li>
+                        <li>System health</li>
+                    </ul>
+                </div>
+                
+                <div class="function-card">
+                    <h5>🔒 Security Management</h5>
+                    <ul>
+                        <li>Account locking/unlocking</li>
+                        <li>Password resets</li>
+                        <li>Failed login monitoring</li>
+                        <li>Security event logs</li>
+                    </ul>
+                </div>
+                
+                <div class="function-card">
+                    <h5>🗄️ Database Access</h5>
+                    <ul>
+                        <li>H2 Console access</li>
+                        <li>Data backup</li>
+                        <li>Database monitoring</li>
+                        <li>Query execution</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h4>🧪 Test API Endpoints</h4>
+            <div class="test-buttons">
+                <button onclick="testAPI('/api/users', 'GET')" class="btn btn-primary">📋 Test Get All Users</button>
+                <button onclick="testAPI('/api/secure/admin/users', 'GET')" class="btn btn-success">👑 Test Admin Users API</button>
+                <button onclick="testAPI('/api/secure/admin/stats', 'GET')" class="btn btn-primary">📊 Test Admin Stats</button>
+                <button onclick="testAPI('/api/secure/manager/reports', 'GET')" class="btn btn-success">📈 Test Manager Reports</button>
+                <button onclick="testAPI('/api/secure/me', 'GET')" class="btn btn-primary">👤 Test Current User</button>
+                <a href="/h2-console" target="_blank" class="btn btn-danger">🗄️ H2 Database Console</a>
+                <a href="/actuator" target="_blank" class="btn btn-primary">📊 Actuator Endpoints</a>
+            </div>
+            
+            <div id="api-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; display: none;">
+                <h5>API Response:</h5>
+                <pre id="api-response"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testAPI(url, method) {
+            const resultDiv = document.getElementById('api-result');
+            const responseDiv = document.getElementById('api-response');
+            
+            resultDiv.style.display = 'block';
+            responseDiv.textContent = 'Loading...';
+            
+            fetch(url, { 
+                method: method,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                resultDiv.style.backgroundColor = '#d4edda';
+                resultDiv.style.borderLeft = '4px solid #28a745';
+            })
+            .catch(error => {
+                responseDiv.textContent = `Error: ${error.message}`;
+                resultDiv.style.backgroundColor = '#f8d7da';
+                resultDiv.style.borderLeft = '4px solid #dc3545';
+            });
+        }
+    </script>
+</body>
+</html>
