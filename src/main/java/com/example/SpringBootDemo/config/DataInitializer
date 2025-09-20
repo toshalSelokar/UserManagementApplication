@@ -1,0 +1,83 @@
+package com.example.SpringBootDemo.config;
+
+import com.example.SpringBootDemo.entity.User;
+import com.example.SpringBootDemo.entity.UserRole;
+import com.example.SpringBootDemo.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+/**
+ * Simple Data Initializer to create default users for testing
+ * 
+ * @author User Management Team
+ * @version 1.0
+ */
+@Component
+public class DataInitializer implements CommandLineRunner {
+
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Override
+    public void run(String... args) throws Exception {
+        try {
+            createDefaultUsers();
+        } catch (Exception e) {
+            System.err.println("❌ Error creating default users: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Create default users if they don't exist
+     */
+    private void createDefaultUsers() {
+        System.out.println("🔄 Initializing default users...");
+        
+        // Create Admin user
+        createUserIfNotExists("admin@example.com", "Admin", "User", "admin123", UserRole.ADMIN, "1234567890");
+        
+        // Create Manager user
+        createUserIfNotExists("manager@example.com", "Manager", "User", "manager123", UserRole.MANAGER, "2345678901");
+        
+        // Create Regular user
+        createUserIfNotExists("user@example.com", "Regular", "User", "user123", UserRole.USER, "3456789012");
+        
+        System.out.println("🎯 Data initialization completed!");
+    }
+
+    /**
+     * Create a user if it doesn't already exist
+     */
+    private void createUserIfNotExists(String email, String firstName, String lastName, 
+                                     String password, UserRole role, String phone) {
+        try {
+            if (userRepository.findByEmail(email).isEmpty()) {
+                User user = new User();
+                user.setFirstName(firstName);
+                user.setLastName(lastName);
+                user.setEmail(email);
+                user.setPhone(phone);
+                user.setPassword(passwordEncoder.encode(password));
+                user.setRole(role);
+                user.setEnabled(true);
+                user.setAccountNonExpired(true);
+                user.setAccountNonLocked(true);
+                user.setCredentialsNonExpired(true);
+                user.setFailedLoginAttempts(0);
+                
+                userRepository.save(user);
+                System.out.println("✅ Created " + role.getDisplayName() + " user: " + email + " / " + password);
+            } else {
+                System.out.println("ℹ️ User already exists: " + email);
+            }
+        } catch (Exception e) {
+            System.err.println("❌ Failed to create user " + email + ": " + e.getMessage());
+        }
+    }
+}
