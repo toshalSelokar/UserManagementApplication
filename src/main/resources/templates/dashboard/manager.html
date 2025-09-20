@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Manager Dashboard - User Management System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f8f9fa;
+            color: #333;
+        }
+        .header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+        .logout-btn {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .logout-btn:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .nav-tabs {
+            background: white;
+            padding: 0;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .nav-tabs a {
+            display: inline-block;
+            padding: 15px 25px;
+            text-decoration: none;
+            color: #666;
+            border-right: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+        .nav-tabs a:hover, .nav-tabs a.active {
+            background-color: #28a745;
+            color: white;
+        }
+        .user-info {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .user-info h3 {
+            margin-top: 0;
+            color: #28a745;
+        }
+        .manager-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .authority-badge {
+            background: #28a745;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+            margin: 5px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>👔 Manager Dashboard</h1>
+            <form th:action="@{/logout}" method="post" style="display: inline;">
+                <button type="submit" class="logout-btn">🚪 Logout</button>
+            </form>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="nav-tabs">
+            <a href="/dashboard">🏠 Dashboard</a>
+            <a href="/admin/dashboard" sec:authorize="hasRole('ADMIN')">👑 Admin Panel</a>
+            <a href="/manager/dashboard" class="active">👔 Manager Panel</a>
+            <a href="/user/dashboard">👤 User Panel</a>
+            <a href="/profile">⚙️ Profile</a>
+        </div>
+        
+        <div class="user-info">
+            <h3>Welcome, <span th:text="${fullName}">Manager User</span>! 👔</h3>
+            <p><strong>Email:</strong> <span th:text="${username}">manager@example.com</span></p>
+            <p><strong>Role:</strong> <span th:text="${role}">MANAGER</span></p>
+            <p><strong>Message:</strong> <span th:text="${welcomeMessage}">Welcome message</span></p>
+            
+            <div>
+                <div th:each="authority : ${authorities}" class="authority-badge" th:text="${authority.authority}">ROLE_MANAGER</div>
+            </div>
+        </div>
+        
+        <div class="manager-panel">
+            <h4>📈 Manager Functions</h4>
+            <p>As a manager, you have access to user management and reporting features.</p>
+            
+            <div>
+                <button onclick="testAPI('/api/users', 'GET')" class="btn btn-primary">📋 View Users</button>
+                <button onclick="testAPI('/api/secure/manager/reports', 'GET')" class="btn btn-success">📊 Manager Reports</button>
+                <button onclick="testAPI('/api/secure/me', 'GET')" class="btn btn-primary">👤 My Profile</button>
+                <a href="/h2-console" target="_blank" class="btn btn-primary">🗄️ Database Console</a>
+            </div>
+            
+            <div id="api-result" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; display: none;">
+                <h5>API Response:</h5>
+                <pre id="api-response"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function testAPI(url, method) {
+            const resultDiv = document.getElementById('api-result');
+            const responseDiv = document.getElementById('api-response');
+            
+            resultDiv.style.display = 'block';
+            responseDiv.textContent = 'Loading...';
+            
+            fetch(url, { method: method })
+            .then(response => response.json())
+            .then(data => {
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+                resultDiv.style.backgroundColor = '#d4edda';
+            })
+            .catch(error => {
+                responseDiv.textContent = 'Error: ' + error.message;
+                resultDiv.style.backgroundColor = '#f8d7da';
+            });
+        }
+    </script>
+</body>
+</html>
