@@ -1,0 +1,129 @@
+package com.example.SpringBootDemo.service;
+
+import com.example.SpringBootDemo.config.KafkaConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/**
+ * Kafka Consumer Service
+ * 
+ * This service handles consuming messages from Kafka topics.
+ * 
+ * @author User Management Team
+ * @version 1.0
+ */
+@Service
+public class KafkaConsumerService {
+
+    private static final Logger logger = LoggerFactory.getLogger(KafkaConsumerService.class);
+
+    // Store consumed messages for testing purposes
+    private final List<String> userEvents = new CopyOnWriteArrayList<>();
+    private final List<String> notifications = new CopyOnWriteArrayList<>();
+
+    /**
+     * Listen to user-events topic
+     */
+    @KafkaListener(topics = KafkaConfig.USER_EVENTS_TOPIC, groupId = "user-management-group")
+    public void consumeUserEvent(@Payload String message,
+                                @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+                                @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
+                                @Header(KafkaHeaders.OFFSET) long offset) {
+        
+        logger.info("📥 Received user event from topic: {}, partition: {}, offset: {}, message: {}", 
+                topic, partition, offset, message);
+        
+        // Store the message for testing
+        userEvents.add(message);
+        
+        // Process the user event (you can add your business logic here)
+        processUserEvent(message);
+    }
+
+    /**
+     * Listen to notifications topic
+     */
+    @KafkaListener(topics = KafkaConfig.NOTIFICATIONS_TOPIC, groupId = "user-management-group")
+    public void consumeNotification(@Payload String message,
+                                   @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+                                   @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
+                                   @Header(KafkaHeaders.OFFSET) long offset) {
+        
+        logger.info("📥 Received notification from topic: {}, partition: {}, offset: {}, message: {}", 
+                topic, partition, offset, message);
+        
+        // Store the message for testing
+        notifications.add(message);
+        
+        // Process the notification (you can add your business logic here)
+        processNotification(message);
+    }
+
+    /**
+     * Process user event message
+     */
+    private void processUserEvent(String message) {
+        try {
+            // Here you can add your business logic to process user events
+            // For example: update cache, send emails, trigger workflows, etc.
+            logger.info("🔄 Processing user event: {}", message);
+            
+            // Simulate some processing
+            Thread.sleep(100);
+            
+            logger.info("✅ User event processed successfully");
+        } catch (Exception e) {
+            logger.error("❌ Error processing user event: {}", message, e);
+        }
+    }
+
+    /**
+     * Process notification message
+     */
+    private void processNotification(String message) {
+        try {
+            // Here you can add your business logic to process notifications
+            // For example: send emails, SMS, push notifications, etc.
+            logger.info("🔄 Processing notification: {}", message);
+            
+            // Simulate some processing
+            Thread.sleep(100);
+            
+            logger.info("✅ Notification processed successfully");
+        } catch (Exception e) {
+            logger.error("❌ Error processing notification: {}", message, e);
+        }
+    }
+
+    /**
+     * Get consumed user events (for testing)
+     */
+    public List<String> getConsumedUserEvents() {
+        return new ArrayList<>(userEvents);
+    }
+
+    /**
+     * Get consumed notifications (for testing)
+     */
+    public List<String> getConsumedNotifications() {
+        return new ArrayList<>(notifications);
+    }
+
+    /**
+     * Clear consumed messages (for testing)
+     */
+    public void clearConsumedMessages() {
+        userEvents.clear();
+        notifications.clear();
+        logger.info("🧹 Cleared all consumed messages");
+    }
+}
