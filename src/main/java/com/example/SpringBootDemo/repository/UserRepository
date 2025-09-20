@@ -1,0 +1,158 @@
+package com.example.SpringBootDemo.repository;
+
+import com.example.SpringBootDemo.entity.User;
+import com.example.SpringBootDemo.entity.UserRole;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+ * Repository interface for User entity with security features
+ * Extends JpaRepository to get basic CRUD operations
+ * Demonstrates custom query methods and security-related queries
+ */
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+    
+    // Spring Data JPA will automatically implement these methods based on method names
+    // Ref: https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html
+
+    /**
+     * Find user by email address (used for authentication)
+     * @param email the email to search for
+     * @return Optional containing the user if found
+     */
+    Optional<User> findByEmail(String email);
+    
+    /**
+     * Find users by first name (case-insensitive)
+     * @param firstName the first name to search for
+     * @return list of users with matching first name
+     */
+    List<User> findByFirstNameIgnoreCase(String firstName);
+    
+    /**
+     * Find users by last name (case-insensitive)
+     * @param lastName the last name to search for
+     * @return list of users with matching last name
+     */
+    List<User> findByLastNameIgnoreCase(String lastName);
+    
+    /**
+     * Find users by first name and last name
+     * @param firstName the first name
+     * @param lastName the last name
+     * @return list of users matching both names
+     */
+    List<User> findByFirstNameAndLastName(String firstName, String lastName);
+    
+    /**
+     * Check if a user exists with the given email
+     * @param email the email to check
+     * @return true if user exists, false otherwise
+     */
+    boolean existsByEmail(String email);
+    
+    /**
+     * Find users whose email contains the given string
+     * @param emailPart part of the email to search for
+     * @return list of users with matching email pattern
+     */
+    List<User> findByEmailContaining(String emailPart);
+    
+    /**
+     * Custom query to find users by full name using JPQL
+     * @param searchTerm the search term to match against full name
+     * @return list of users matching the search term
+     */
+    @Query("SELECT u FROM User u WHERE CONCAT(u.firstName, ' ', u.lastName) LIKE %:searchTerm%")
+    List<User> findByFullNameContaining(@Param("searchTerm") String searchTerm);
+    
+    /**
+     * Custom native SQL query to count users by domain
+     * @param domain the email domain (e.g., "gmail.com")
+     * @return count of users with that email domain
+     */
+    @Query(value = "SELECT COUNT(*) FROM users WHERE email LIKE %:domain%", nativeQuery = true)
+    long countByEmailDomain(@Param("domain") String domain);
+    
+    // Security-related query methods
+    
+    /**
+     * Find users by role
+     * @param role the user role to search for
+     * @return list of users with the specified role
+     */
+    List<User> findByRole(UserRole role);
+    
+    /**
+     * Find enabled users
+     * @param enabled the enabled status
+     * @return list of users with the specified enabled status
+     */
+    List<User> findByEnabled(boolean enabled);
+    
+    /**
+     * Find users by role and enabled status
+     * @param role the user role
+     * @param enabled the enabled status
+     * @return list of users matching both criteria
+     */
+    List<User> findByRoleAndEnabled(UserRole role, boolean enabled);
+    
+    /**
+     * Find users with failed login attempts greater than specified count
+     * @param attempts the minimum number of failed attempts
+     * @return list of users with failed login attempts
+     */
+    List<User> findByFailedLoginAttemptsGreaterThan(int attempts);
+    
+    /**
+     * Find locked accounts
+     * @param accountNonLocked the account lock status (false for locked accounts)
+     * @return list of locked user accounts
+     */
+    List<User> findByAccountNonLocked(boolean accountNonLocked);
+    
+    /**
+     * Count users by role
+     * @param role the user role
+     * @return count of users with the specified role
+     */
+    long countByRole(UserRole role);
+    
+    /**
+     * Count enabled users
+     * @param enabled the enabled status
+     * @return count of users with the specified enabled status
+     */
+    long countByEnabled(boolean enabled);
+    
+    /**
+     * Custom query to find users created in the last N days
+     * @param days number of days to look back
+     * @return list of recently created users
+     */
+    @Query("SELECT u FROM User u WHERE u.createdAt >= CURRENT_TIMESTAMP - :days DAY")
+    List<User> findUsersCreatedInLastDays(@Param("days") int days);
+    
+    /**
+     * Custom query to find users who logged in recently
+     * @param days number of days to look back
+     * @return list of users with recent login activity
+     */
+    @Query("SELECT u FROM User u WHERE u.lastLogin >= CURRENT_TIMESTAMP - :days DAY")
+    List<User> findUsersWithRecentLogin(@Param("days") int days);
+    
+    /**
+     * Find users by role with custom query (for complex role-based queries)
+     * @param roleName the role name as string
+     * @return list of users with the specified role
+     */
+    @Query("SELECT u FROM User u WHERE u.role = :role")
+    List<User> findUsersByRole(@Param("role") UserRole role);
+}
